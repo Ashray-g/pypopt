@@ -40,18 +40,61 @@ def gradient_f(f, variables, sub):
 
 def pk(f, variables, sub):
     h = hessian_f(f, variables, sub)
+    modified_h = hessian_modification_multiple_I(h)
+    h_inv = np.linalg.inv(modified_h)
+
     g = gradient_f(f, variables, sub)
-    h_inv = np.linalg.inv(h)
 
     return (-h_inv * g).astype('float64')
 
+def armijo_condition(cur, new):
+    return cur > new;
 
-x = sm.symbols('x')
-f = x**3 - x
+c1 = 1e-4
+c2 = 0.9
+line_search_tau = 0.5
 
-hessian = hessian_f(f, [x], {x:-0.1})
+x, y = sm.symbols('x y')
+f = f = (4 - 2.1 * (x**2) + (x**4)/3) * (x**2) + x * y + (-4 + 4 * (y ** 2)) * (y ** 2)
 
-a = hessian_modification_multiple_I(hessian)
+x0 = np.matrix([[0.01], [0.01]])
 
+xs = []
+ys = []
 
-print(a)
+xs.append(-1)
+ys.append(f.evalf(subs={x:x0.item(0, 0), y:x0.item(1, 0)}))
+
+for k in range(0, 50):
+    sub = {x:x0.item(0, 0), y:x0.item(1, 0)}
+    direction = pk(f, [x, y], sub)
+    alpha = 1.0
+    ct = 0
+    while(True):
+        ct+=1
+
+        x_n = x0 + np.matrix(direction) * alpha
+
+        cur = f.evalf(subs={x:x0.item(0, 0), y:x0.item(1, 0)})
+        new = f.evalf(subs={x:x_n.item(0, 0), y:x_n.item(1, 0)})
+
+        if(armijo_condition(cur, new)):
+            break
+        else:
+            alpha *= line_search_tau
+        if(ct == 30):
+            break
+            k = 100
+
+    if (k > 50):
+        break
+
+    x0 += np.matrix(direction) * alpha
+
+    xs.append(k)
+    ys.append(f.evalf(subs={x:x0.item(0, 0), y:x0.item(1, 0)}))
+
+    print(x0)
+
+plt.plot(xs, ys)
+plt.show()
