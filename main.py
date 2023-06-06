@@ -38,6 +38,13 @@ def gradient_f(f, variables, sub):
         grad.append([f.diff(variables[i]).evalf(subs=sub)])
     return grad
 
+def pk(f, variables, sub):
+    h = hessian_f(f, variables, sub)
+    g = gradient_f(f, variables, sub)
+    h_inv = np.linalg.inv(h)
+
+    return (-h_inv * g).astype('float64')
+
 
 x = sm.symbols('x')
 f = x**3 - x
