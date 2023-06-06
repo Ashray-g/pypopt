@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 from math import *
 import matplotlib.pyplot as plt
+import sympy as sm
 
 #Example function: f(x) = x³ − x
 
@@ -9,7 +10,7 @@ def hessian_modification_multiple_I(hessian):
     beta = 1e-3
     rows = len(hessian)
     min_diag = min(np.diag(hessian))
-    tau = max(0, min_diag)
+    tau = None
 
     if(min_diag > 0):
         tau = 0
@@ -27,8 +28,16 @@ def hessian_modification_multiple_I(hessian):
 
     return hessian
 
-hessian = [[-1, 0, 0], [0, -2, 0], [0, 0, 0]]
+def hessian_f(f, variables, sub):
+    hessian = np.array(sm.hessian(f, variables).evalf(subs=sub)).astype('float64')
+    return hessian
+
+x = sm.symbols('x')
+f = x**3 - x
+
+hessian = hessian_f(f, [x], {x:-0.1})
 
 a = hessian_modification_multiple_I(hessian)
+
 
 print(a)
