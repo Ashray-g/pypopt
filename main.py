@@ -29,8 +29,15 @@ def hessian_modification_multiple_I(hessian):
     return hessian
 
 def hessian_f(f, variables, sub):
-    hessian = np.array(sm.hessian(f, variables).evalf(subs=sub)).astype('float64')
+    hessian = np.matrix(sm.hessian(f, variables).evalf(subs=sub)).astype('float64')
     return hessian
+
+def gradient_f(f, variables, sub):
+    grad = []
+    for i in range(len(variables)):
+        grad.append([f.diff(variables[i]).evalf(subs=sub)])
+    return grad
+
 
 x = sm.symbols('x')
 f = x**3 - x
